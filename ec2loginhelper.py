@@ -16,6 +16,7 @@ import os
 import boto
 import boto.ec2
 import sys
+import traceback
 from optparse import OptionParser
 
 # Change these values ============================
@@ -85,7 +86,7 @@ class EC2LoginHelper:
 
             print '...Done.'
         except:
-            print 'EC2 Connection Error!!'
+            print 'EC2 Connection Error!!\nTRACEBACK: %s' % traceback.format_exc()
             return
 
         self._show_instance_info(instances)
