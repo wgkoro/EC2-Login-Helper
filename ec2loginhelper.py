@@ -72,7 +72,7 @@ class EC2LoginHelper:
 
         print 'Connecting to EC2 (%s)...' % region_name
         try:
-            if not aws_data['access']:
+            if not aws_data['access_key']:
                 self.conn = boto.ec2.connect_to_region(region_name=region_name)
             else:
                 self.conn = boto.ec2.connect_to_region( region_name=region_name,
