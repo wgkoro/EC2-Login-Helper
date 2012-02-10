@@ -1,0 +1,109 @@
+作成者      ： wg_koro
+ライセンス  ： MIT License
+
+EC2インスタンスが増えてくると、sshのconfigを設定するのが面倒くさくなりますよね！
+AWSのアカウントが増えたりなんかしたらもうやってらんない。
+
+そんなダルイ状況を解決するために作りました。
+EC2インスタンスログイン補助スクリプトです。
+
+スクリプトを実行すると、アカウントで立ち上がっているインスタンスリストを下記のように一覧表示します。
+
+識別番号(連番), インスタンスのタグ名, Public DNS, インスタンスイメージID, インスタンスID, sshプライベートキー名
+------------------------------------------------------------
+0: hoge1, ec2-xxxxxxxxxx.compute.amazonaws.com, ami-xxxx, i-xxxx, private.pem
+------------------------------------------------------------
+1: fugafuga, ec2-xxxxxxxxxx.compute.amazonaws.com, ami-xxxx, i-xxxx, private.pem
+------------------------------------------------------------
+
+接続したいインスタンスの識別番号を打ち込むよう促されます。
+上表の先頭にある番号を打ち込むと、そのインスタンスへSSH接続します。
+
+下記は対応済
+・AWSマルチアカウント
+・ログインユーザー個別指定
+・接続ポート個別指定
+・接続リージョン個別指定
+
+
+必要環境 ==========
+・Python 2.6かそれ以降
+・botoパッケージ (easy_install boto か pip install boto でインストール可能)
+
+
+初期設定 ==========
+スクリプトを開き、下記部分を編集して下さい。
+# Change these value ============================
+SSH_DIR = '/Users/xxxxx/.ssh/'
+DEFAULT_USER = 'ec2-user'
+DEFAULT_PORT = 22
+AWS_DATA = {
+    'default'   : {
+        'access_key'    : '',
+        'secret_key'    : '',
+        'region'        : 't',
+    },
+}
+# ==============================================
+
+SSH_DIR: SSHのプライベートキーが格納されているディレクトリ
+DEFAULT_USER: ユーザー指定が無い時に使うユーザー名
+DEFAULT_PORT: ポート指定が無い時に使うポート番号
+AWS_DATA: 
+    AWSのアクセスキー、シークレットキー、デフォルトで接続するリージョンIDを指定。
+    リージョンID = 辞書'REGION'のキー。東京なら't'を指定。
+    REGION = {
+        't'     : 'ap-northeast-1', # TOKYO
+        's'     : 'ap-southeast-1', # SINGAPORE
+        'v'     : 'us-east-1', # US East(Virginia)
+        'o'     : 'us-west-2', # US West(Oregon)
+        'n'     : 'us-west-1', # US West(N. California)
+        'e'     : 'eu-west-1', # EU West(Ireland)
+        'sa'    : 'sa-east-1', # S. America(Sao Paulo)
+    }
+
+
+    'default'はアカウント指定が無い場合に呼び出されます。
+    defaultのaccess_key, secret_keyが空の場合、
+    環境変数AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEYから自動で読み出されます。
+
+    複数のAWSアカウントを指定する場合は
+    AWS_DATA = {
+        'default'   : {
+            'access_key'    : '',
+            'secret_key'    : '',
+            'region'        : 't',
+        },
+        'account_2'   : {
+            'access_key'    : 'ACCESSKEYACCESSKEYACCESSKEY',
+            'secret_key'    : 'SECRETKEYSECRETKEYSECRETKEYSECRETKEYSECRETKEY',
+            'region'        : 's',
+        },
+        'account_3'   : {
+            'access_key'    : 'ACCESSKEYACCESSKEYACCESSKEY',
+            'secret_key'    : 'SECRETKEYSECRETKEYSECRETKEYSECRETKEYSECRETKEY',
+            'region'        : 't',
+        },
+    }
+    のようにして下さい。
+
+
+使い方 ==========
+基本は下記でＯＫ。
+$ python ec2loginhelper.py
+
+AWSの別アカウントを指定したい場合は、第一引数にAWS_DATAのキーを指定して下さい。
+$ python ec2loginhelper.py account_2
+
+ポート番号の変更は-pオプションで。
+$ python ec2loginhelper.py -p 1234
+
+リージョンの変更は-rオプションで。
+$ python ec2loginhelper.py account_3 -r s
+↑'account_3'でシンガポールリージョンへ接続
+
+
+おまけ ==========
+このスクリプトをec2.pyとか適当に短いファイル名にして、
+ローカルのパスが通っている場所へ放り込むと、
+どこからでもec2.pyで接続できるので幸せになれるかもです。

@@ -1,0 +1,101 @@
+EC2 Login Helper
+
+Author      : wg_koro
+License     : MIT License
+
+If you are running many EC2 instances, or multiple AWS account,
+it's hard to setup your ssh config, isn't it?
+
+This script helps you to login to instances easily.
+When you run this script, it will show instance list like below.
+
+Order number, Tag name of instance, Public DNS, Image id, Instance id, SSH key name
+------------------------------------------------------------
+0: hoge1, ec2-xxxxxxxxxx.compute.amazonaws.com, ami-xxxx, i-xxxx, private_key.pem
+------------------------------------------------------------
+1: fugafuga, ec2-xxxxxxxxxx.compute.amazonaws.com, ami-xxxx, i-xxxx, private_key.pem
+------------------------------------------------------------
+
+You can SSH to instance if you put order number.
+
+This script also allows
+・AWS multiple account
+・Specify login username individually.
+・Specify port number individually.
+・Specify region individually.
+
+
+Requirement ==========
+・Python 2.6 or later
+・boto package (you can install boto via easy_install or pip)
+
+
+First Setting ==========
+Open the script, and edit below.
+# Change these value ============================
+SSH_DIR = '/Users/xxxxx/.ssh/'
+DEFAULT_USER = 'ec2-user'
+DEFAULT_PORT = 22
+AWS_DATA = {
+    'default'   : {
+        'access_key'    : '',
+        'secret_key'    : '',
+        'region'        : 't',
+    },
+}
+# ==============================================
+
+SSH_DIR: Path of SSH private key files directory.
+DEFAULT_USER: This username will be used for login if you don't specify username.
+DEFAULT_PORT: This number will be used for port number if you don't specify port number.
+AWS_DATA: 
+    Specify AWS access key, secret key, region-id.
+    Region-id = Key of dictionary 'REGION'. If you want to connect to 'US EAST', set 'v'.
+    REGION = {
+        't'     : 'ap-northeast-1', # TOKYO
+        's'     : 'ap-southeast-1', # SINGAPORE
+        'v'     : 'us-east-1', # US East(Virginia)
+        'o'     : 'us-west-2', # US West(Oregon)
+        'n'     : 'us-west-1', # US West(N. California)
+        'e'     : 'eu-west-1', # EU West(Ireland)
+        'sa'    : 'sa-east-1', # S. America(Sao Paulo)
+    }
+
+    'default' will be called when you don't specify account name.
+    If access_key and secret_key are blank,
+    environment variable 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' will be called.
+
+    If you have multiple AWS accounts, set AWS_DATA like below.
+    AWS_DATA = {
+        'default'   : {
+            'access_key'    : '',
+            'secret_key'    : '',
+            'region'        : 't',
+        },
+        'account_2'   : {
+            'access_key'    : 'ACCESSKEYACCESSKEYACCESSKEY',
+            'secret_key'    : 'SECRETKEYSECRETKEYSECRETKEYSECRETKEYSECRETKEY',
+            'region'        : 's',
+        },
+        'account_3'   : {
+            'access_key'    : 'ACCESSKEYACCESSKEYACCESSKEY',
+            'secret_key'    : 'SECRETKEYSECRETKEYSECRETKEYSECRETKEYSECRETKEY',
+            'region'        : 't',
+        },
+    }
+    *You can set any strings to key as you like!
+
+
+How to use ==========
+Basic
+$ python ec2loginhelper.py
+
+If you want to connect another account,
+$ python ec2loginhelper.py account_2
+
+Change port number by using option '-p',
+$ python ec2loginhelper.py -p 1234
+
+Change region by using option '-r',
+Example: Connect to Singapore region (using account_3)
+$ python ec2loginhelper.py account_3 -r s
